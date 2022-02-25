@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-import time
-import random
 
 def detect_rect(mask):
     
@@ -25,7 +23,7 @@ def get_sub_masks(image, min_area=500):
     color_to_idx = {}
     id_to_color = {}
     idx = 0
-    start = time.time()
+
     for i in range(h):
         for j in range(w):
             color = image[i, j, :]
@@ -164,12 +162,9 @@ def clean_background(image, min_size=10):
     ret, thresh = cv2.threshold(gray, 0, 200, cv2.THRESH_BINARY)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    black = np.ones((h, w, 3), np.uint8) * 255
     for cnt in contours:
-        color_ = (random.randint(0, 255), random.randint(0, 255),random.randint(0, 255))
         x, y, w, h = cv2.boundingRect(cnt)
         if w < min_size or h < min_size:
-            cv2.rectangle(black, (x, y), (x+w, y+h), color_, 1)
             mask[y:y+h, x:x+w] = 255
 
     mask_color = np.stack([mask, mask, mask], axis=2)
@@ -178,7 +173,6 @@ def clean_background(image, min_size=10):
     mask = cv2.inRange(image_copy, np.array([0, 0, 0]), np.array([30, 30, 30]))
     mask_color = np.stack([mask, mask, mask], axis=2)
     image[mask_color>0] = 0
-    # image[mask_color==0] = 255
 
     return image
 

@@ -1,5 +1,6 @@
 
 import os
+import time
 import cv2
 import numpy as np
 from utils import *
@@ -25,6 +26,21 @@ def color_segment_2(image, min_size=20, min_area=400):
     for mask in masks:
         rects += get_rects_from_mask(mask, min_size=20)
     return rects
+
+
+def save_result_to_txt(file_path, rects, left_top, bottom_right, width, height):
+
+    ppx = width / (bottom_right[0] - left_top[0])
+    ppy = height / (bottom_right[1] - left_top[1])
+    with open(file_path, 'w') as f:
+        for (x1, y1, x2, y2) in rects:
+            x1 = round(x1 * ppx, 3)
+            y1 = round(y1 * ppy, 3)
+            x2 = round(x2 * ppx, 3)
+            y2 = round(y2 * ppy, 3)
+        f.write(f'{x1},{y1},{x2},{y2}\n')
+
+
 
 
 
