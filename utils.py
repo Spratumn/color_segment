@@ -1,3 +1,4 @@
+import enum
 import cv2
 import numpy as np
 
@@ -16,30 +17,28 @@ def detect_rect(mask):
 
 
 def get_sub_masks(image, min_area=500):
-
-    masks = []
-    colors = []
     h, w = image.shape[:2]
-    color_to_idx = {}
-    id_to_color = {}
-    idx = 0
-
+    
+    color_dict = {}
     for i in range(h):
         for j in range(w):
             color = image[i, j, :]
             if is_in_color_range(color, [[0, 5], [0, 5], [0, 5]]):continue
             color_str = f'{color[0]},{color[1]},{color[2]}'
-            if color_str not in color_to_idx:
-                mask = cv2.inRange(image, color, color)
-                if np.sum(mask == 255) < min_area:
-                    color_to_idx[color_str] = -1
-                else:
-                    masks.append(mask)
-                    colors.append(list(color))
-                    color_to_idx[color_str] = idx
-                    id_to_color[idx] = color_str
-                    idx += 1
-                    
+            if color_str not in color_dict:
+                color_dict[color_str] = 1
+            else:
+                color_dict[color_str] += 1
+    
+    colors = []
+    masks = []
+    for color_str in color_dict.keys():
+        if color_dict[color_str] < min_area:continue
+        color = np.array([int(v) for v in color_str.split(',')])
+        mask = cv2.inRange(image, color, color)
+        colors.append(list(color))
+        masks.append(mask)
+             
     return colors, masks
 
 
@@ -121,8 +120,18 @@ def filter_edge_mask(masks):
     return filtered_masks
 
 
-def nms(rects):
-    return rects
+def nms(rects, iou_thresh=0.7):
+    output_rects = []
+    while len(rects):
+        base_rect = rects.pop(0)
+        output_rects.append(base_rect)
+
+        temp_rects = []
+        for rect in rects:
+            if iou(rect, base_rect) < iou_thresh:
+                temp_rects.append(rect)
+        rects = temp_rects
+    return output_rects
 
 
 def iou(rect1, rect2):
@@ -130,11 +139,11 @@ def iou(rect1, rect2):
     area1 = (x2 - x1) * (y2 - y1)
     x1, y1, x2, y2 = rect2
     area2 = (x2 - x1) * (y2 - y1)
-    left = max(rect1[0], rect2[0])
-    top = max(rect1[1], rect2[1])
-    right = min(rect1[2], rect2[2])
-    bottom = min(rect1[3], rect2[3])
-    return (right-left)*(bottom-top) / (area1 + area2)
+
+    inter_w = min(rect1[2], rect2[2]) - max(rect1[0], rect2[0])
+    inter_h = min(rect1[3], rect2[3]) - max(rect1[1], rect2[1])
+    inter = 0 if inter_w < 0  or inter_h < 0 else inter_w * inter_h
+    return inter / (area1 + area2)
 
 
 def clean_background(image, min_size=10):
@@ -232,3 +241,41 @@ def is_in_color_range(color, color_range):
         if color[i] not in range(v_range[0], v_range[1]+1):return False
         
     return True
+
+
+def vote_filter2d(image, ksize=3):
+    h, w = image.shape[:2]
+    n_w = w // ksize
+    n_h = h // ksize
+
+    out_image = np.array(image)
+
+    for i in range(n_h):
+        for j in range(n_w):
+            h1 = i * ksize
+            h2 = h1 + ksize
+            w1 = j * ksize
+            w2 = w1 + ksize
+            roi = out_image[h1:h2, w1:w2] if len(out_image.shape) == 1 else out_image[h1:h2, w1:w2, :]
+            pix_list = []
+            for ii in range(ksize):
+                for jj in range(ksize):
+                    pix = [roi[ii, jj]] if len(out_image.shape) == 1 else list(roi[ii, jj])
+                    pix_list.append(','.join([str(v) for v in pix]))
+            pix_str = max(set(pix_list), key=pix_list.count)
+            pix = int(pix_str) if len(out_image.shape) == 1 else [int(v) for v in pix_str.split(',')]
+            for ii in range(ksize):
+                for jj in range(ksize):
+                    roi[ii, jj] = pix
+    return out_image
+
+
+
+if __name__ == '__main__':
+    image = cv2.imread('images/image001.png')
+    cv2.imshow('src', image)
+    image1 = vote_filter2d(image, ksize=5)
+    cv2.imshow('vote1', image1)
+    image2 = vote_filter2d(image, ksize=9)
+    cv2.imshow('vote2', image2)
+    cv2.waitKey(0)
