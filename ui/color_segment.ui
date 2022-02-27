@@ -26,15 +26,132 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>9</y>
+      <width>884</width>
+      <height>571</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label">
+       <property name="minimumSize">
+        <size>
+         <width>882</width>
+         <height>520</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>882</width>
+         <height>520</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="3">
+        <widget class="QLabel" name="label_3">
+         <property name="maximumSize">
+          <size>
+           <width>42</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Height:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QPushButton" name="pushButtonNext">
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="minimumSize">
+          <size>
+           <width>550</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Set the image size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="spinBoxWidth">
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>23</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QPushButton" name="pushButtonLast">
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QSpinBox" name="spinBoxHeight">
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>23</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_4">
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Width:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -52,15 +169,7 @@
     <addaction name="actionOpen"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuSegment">
-    <property name="title">
-     <string>Segment</string>
-    </property>
-    <addaction name="actionMethod1"/>
-    <addaction name="actionMethod2"/>
-   </widget>
    <addaction name="menu"/>
-   <addaction name="menuSegment"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -80,16 +189,6 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::WindowShortcut</enum>
-   </property>
-  </action>
-  <action name="actionMethod1">
-   <property name="text">
-    <string>Method1</string>
-   </property>
-  </action>
-  <action name="actionMethod2">
-   <property name="text">
-    <string>Method2</string>
    </property>
   </action>
  </widget>
