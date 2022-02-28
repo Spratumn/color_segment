@@ -12,8 +12,8 @@ def color_segment_1(image, min_size=20):
 
     image_clean = cv2.GaussianBlur(image_clean, (5, 5), 1)
     gray = cv2.cvtColor(image_clean, cv2.COLOR_BGR2GRAY)
-    rects = get_rects_from_gray_image(gray, min_size=min_size)
-    return rects
+    rects, areas = get_rects_from_gray_image(gray, min_size=min_size)
+    return rects, areas
 
 
 def color_segment_2(image, min_size=20, min_area=400):
@@ -25,27 +25,33 @@ def color_segment_2(image, min_size=20, min_area=400):
     masks = filter_edge_mask(masks)
 
     rects = []
+    areas = []
     for mask in masks:
-        rects += get_rects_from_mask(mask, min_size=20)
-    return rects
+        rects_, areas_ = get_rects_from_mask(mask, min_size=20)
+        rects += rects_
+        areas += areas_
+    return rects, areas
 
 
-def save_result_to_txt(file_path, rects, width, height, points):
+def save_result_to_txt(file_path, rects, areas, width, height, points):
 
     left = min(points[0][0], points[1][0])
     top = min(points[0][1], points[1][1])
     right = max(points[0][0], points[1][0])
     bottom = max(points[0][1], points[1][1])
     
-    ppx = width / (right - left)
-    ppy = height / (bottom - top)
+    ppx = width / (right - left + 1)
+    ppy = height / (bottom - top + 1)
+    idx_sort = np.argsort(np.array(areas))
     with open(file_path, 'w') as f:
-        for (x1, y1, x2, y2) in rects:
+        for idx in idx_sort[::-1]:
+            x1, y1, x2, y2 = rects[idx]
+            area = areas[idx]
             x1_ = round(x1 * ppx, 3)
             y1_ = round(y1 * ppy, 3)
             x2_ = round(x2 * ppx, 3)
             y2_ = round(y2 * ppy, 3)
-            f.write(f'{x1},{y1},{x2},{y2} : {x1_},{y1_},{x2_},{y2_}\n')
+            f.write(f'{x1},{y1},{x2},{y2},{area}: {x1_},{y1_},{x2_},{y2_},{round(area*ppx*ppy, 3)}\n')
 
 
 def color_segmet(image_path, width=None, height=None, points=None, method=2):
@@ -59,11 +65,13 @@ def color_segmet(image_path, width=None, height=None, points=None, method=2):
     segment_method = color_segment_1 if method == 1 else color_segment_2
     image = cv2.imread(image_path)
 
-    rects = segment_method(image)
+    rects, areas = segment_method(image)
 
     result_image_path = image_path.replace('.png', '_result.jpg')
-    for (x1, y1, x2, y2) in rects:
+    for (x1, y1, x2, y2), area in zip(rects, areas):
         cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+        cv2.putText(image, f'{area}', (x1, y2-25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+        cv2.putText(image, f'({x2-x1},{y2-y1})', (x1, y2), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
     cv2.imwrite(result_image_path, image)
     
     image_height, image_width = image.shape[:2]
@@ -72,7 +80,7 @@ def color_segmet(image_path, width=None, height=None, points=None, method=2):
         height = image_height
     if points is None:
         points = [[0, 0], [image_width-1, image_height-1]]
-    save_result_to_txt(result_path, rects, width, height, points)
+    save_result_to_txt(result_path, rects, areas, width, height, points)
 
 
 def color_segment_runner(image_dir):

@@ -195,7 +195,7 @@ def get_rects_from_mask(mask, min_size=20):
     
     rects = []
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
+    areas = []
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
         if w < min_size or h < min_size:continue
@@ -204,7 +204,8 @@ def get_rects_from_mask(mask, min_size=20):
         x2 = min(image_w-1, x+w)
         y2 = min(image_h-1, y+h)
         rects.append([x1, y1, x2, y2])
-    return rects
+        areas.append(cv2.contourArea(cnt))
+    return rects, areas
 
 
 def get_rects_from_gray_image(gray_image, min_size=20):
@@ -217,6 +218,7 @@ def get_rects_from_gray_image(gray_image, min_size=20):
 
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     rects = []
+    areas = []
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
         if w < min_size or h < min_size:continue
@@ -225,7 +227,8 @@ def get_rects_from_gray_image(gray_image, min_size=20):
         x2 = min(image_w-1, x+w+5)
         y2 = min(image_h-1, y+h+5)
         rects.append([x1, y1, x2, y2])
-    return rects
+        areas.append(cv2.contourArea(cnt))
+    return rects, areas
 
 
 
