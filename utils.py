@@ -1,4 +1,3 @@
-import enum
 import cv2
 import numpy as np
 
@@ -38,7 +37,6 @@ def get_sub_masks(image, min_area=500):
         mask = cv2.inRange(image, color, color)
         colors.append(list(color))
         masks.append(mask)
-             
     return colors, masks
 
 

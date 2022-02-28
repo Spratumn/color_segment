@@ -1,9 +1,8 @@
 
 import os
-import time
 import cv2
+import ast
 import numpy as np
-from tqdm import tqdm
 from utils import *
 
 
@@ -31,38 +30,79 @@ def color_segment_2(image, min_size=20, min_area=400):
     return rects
 
 
-def save_result_to_txt(file_path, rects, left_top, bottom_right, width, height):
+def save_result_to_txt(file_path, rects, width, height, points):
 
-    ppx = width / (bottom_right[0] - left_top[0])
-    ppy = height / (bottom_right[1] - left_top[1])
+    left = min(points[0][0], points[1][0])
+    top = min(points[0][1], points[1][1])
+    right = max(points[0][0], points[1][0])
+    bottom = max(points[0][1], points[1][1])
+    
+    ppx = width / (right - left)
+    ppy = height / (bottom - top)
     with open(file_path, 'w') as f:
         for (x1, y1, x2, y2) in rects:
-            x1 = round(x1 * ppx, 3)
-            y1 = round(y1 * ppy, 3)
-            x2 = round(x2 * ppx, 3)
-            y2 = round(y2 * ppy, 3)
-        f.write(f'{x1},{y1},{x2},{y2}\n')
+            x1_ = round(x1 * ppx, 3)
+            y1_ = round(y1 * ppy, 3)
+            x2_ = round(x2 * ppx, 3)
+            y2_ = round(y2 * ppy, 3)
+            f.write(f'{x1},{y1},{x2},{y2} : {x1_},{y1_},{x2_},{y2_}\n')
 
+
+def color_segmet(image_path, width=None, height=None, points=None, method=2):
+    if not image_path.endswith('.png') or not os.path.exists(image_path):
+        return
+    file_name = os.path.basename(image_path)
+    file_dir = image_path.replace(file_name, '')
+    file_name = file_name.replace('.png', '.txt')
+    result_path = os.path.join(file_dir, file_name)
+
+    segment_method = color_segment_1 if method == 1 else color_segment_2
+    image = cv2.imread(image_path)
+
+    rects = segment_method(image)
+
+    result_image_path = image_path.replace('.png', '_result.jpg')
+    for (x1, y1, x2, y2) in rects:
+        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    cv2.imwrite(result_image_path, image)
+    
+    image_height, image_width = image.shape[:2]
+    if width is None or height is None:
+        width = image_width
+        height = image_height
+    if points is None:
+        points = [[0, 0], [image_width-1, image_height-1]]
+    save_result_to_txt(result_path, rects, width, height, points)
+
+
+def color_segment_runner(image_dir):
+    image_info_path = os.path.join(image_dir, 'image_info')
+    if not os.path.exists(image_info_path):
+        print('image_info is not exist!')
+        return
+    with open(image_info_path, 'r') as f:
+        image_info = ast.literal_eval(f.readline())
+    for image_name in image_info.keys():
+        image_path = os.path.join(image_dir, image_name)
+        if not os.path.exists(image_path):
+            print(f'{image_path} not exist!')
+            continue
+        print(f'processing {image_path}...')
+        image_info_ = image_info[image_name]
+        width = None if image_info_['width'] == 0 else image_info_['width']
+        height = None if image_info_['height'] == 0 else image_info_['height']
+        points = None if len(image_info_['points']) < 2 else image_info_['points']
+        color_segmet(image_path, width, height, points)
 
 
 if __name__ == '__main__':
-    source_dir = 'images'
-    result_dir = 'results-2'
+    pass
 
-    image_names = os.listdir(source_dir)
-    start_all = time.time()
-    for image_name in tqdm(image_names[:20]):
-        if not image_name.endswith(('.png', '.jpg', '.jpeg')):continue
-        image_path = os.path.join(source_dir, image_name)
-        image = cv2.imread(image_path)
-        
-        # color_rects = color_segment_1(image)
-        color_rects = color_segment_2(image)
+    # 单独处理一张图像
+    # image_path = 'images\image002.png' 
+    # color_segmet(image_path)
 
-        color_rects = nms(color_rects, iou_thresh=0.7)
+    # 批量处理
+    color_segment_runner('images')
 
-        for (x1, y1, x2, y2) in color_rects:
-            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        cv2.imwrite(os.path.join(result_dir, image_name), image)
 
-    print(f'mean time: {(time.time() - start_all) / 20}')

@@ -26,12 +26,12 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>8</x>
       <y>9</y>
-      <width>884</width>
+      <width>927</width>
       <height>571</height>
      </rect>
     </property>
@@ -57,52 +57,20 @@
      </item>
      <item row="1" column="0">
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="3">
-        <widget class="QLabel" name="label_3">
-         <property name="maximumSize">
-          <size>
-           <width>42</width>
-           <height>23</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Height:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="6">
-        <widget class="QPushButton" name="pushButtonNext">
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>23</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="minimumSize">
-          <size>
-           <width>550</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>23</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Set the image size:</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="2">
+        <widget class="QLabel" name="label_4">
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Width:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
         <widget class="QSpinBox" name="spinBoxWidth">
          <property name="maximumSize">
           <size>
@@ -110,9 +78,12 @@
            <height>23</height>
           </size>
          </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
         </widget>
        </item>
-       <item row="0" column="5">
+       <item row="0" column="6">
         <widget class="QPushButton" name="pushButtonLast">
          <property name="maximumSize">
           <size>
@@ -125,18 +96,21 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="4">
-        <widget class="QSpinBox" name="spinBoxHeight">
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="checkBoxSelectPoints">
          <property name="maximumSize">
           <size>
-           <width>50</width>
-           <height>23</height>
+           <width>100</width>
+           <height>16777215</height>
           </size>
+         </property>
+         <property name="text">
+          <string>Select Points</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_4">
+       <item row="0" column="7">
+        <widget class="QPushButton" name="pushButtonNext">
          <property name="maximumSize">
           <size>
            <width>40</width>
@@ -144,7 +118,61 @@
           </size>
          </property>
          <property name="text">
-          <string>Width:</string>
+          <string>&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QSpinBox" name="spinBoxHeight">
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="maximum">
+          <number>2000</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="stepType">
+          <enum>QAbstractSpinBox::DefaultStepType</enum>
+         </property>
+         <property name="displayIntegerBase">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="label_3">
+         <property name="maximumSize">
+          <size>
+           <width>42</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Height:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="minimumSize">
+          <size>
+           <width>400</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>400</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Set the image size.</string>
          </property>
         </widget>
        </item>
