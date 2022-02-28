@@ -42,6 +42,7 @@ class MyPS(QMainWindow, Ui_MainWindow):
         
     def load_file(self):
         self.root_dir = QFileDialog.getExistingDirectory(self, './')
+        if not os.path.exists(self.root_dir):return
         image_names = os.listdir(self.root_dir)
         for file_name in image_names:
             if file_name.endswith(self.image_suffix): 
