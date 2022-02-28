@@ -5,7 +5,7 @@ import ast
 import numpy as np
 from utils import *
 
-
+# 速度快，但效果不太好
 def color_segment_1(image, min_size=20):
     image = vote_filter2d(image, ksize=5)
     image_clean = clean_background(np.array(image), min_size=min_size)
@@ -15,7 +15,7 @@ def color_segment_1(image, min_size=20):
     rects, areas = get_rects_from_gray_image(gray, min_size=min_size)
     return rects, areas
 
-
+# 效果好，速度较慢
 def color_segment_2(image, min_size=20, min_area=400):
     image = vote_filter2d(image, ksize=5)
     image_clean = clean_background(np.array(image), min_size=min_size)
@@ -47,11 +47,11 @@ def save_result_to_txt(file_path, rects, areas, width, height, points):
         for idx in idx_sort[::-1]:
             x1, y1, x2, y2 = rects[idx]
             area = areas[idx]
-            x1_ = round(x1 * ppx, 3)
-            y1_ = round(y1 * ppy, 3)
-            x2_ = round(x2 * ppx, 3)
-            y2_ = round(y2 * ppy, 3)
-            f.write(f'{x1},{y1},{x2},{y2},{area}: {x1_},{y1_},{x2_},{y2_},{round(area*ppx*ppy, 3)}\n')
+            x1_ = round((x1 - left) * ppx, 1)
+            y1_ = round((y1 - top)  * ppy, 1)
+            x2_ = round((x2 - left)  * ppx, 1)
+            y2_ = round((y2 - top)  * ppy, 1)
+            f.write(f'{x1},{y1},{x2},{y2},{area}: {x1_},{y1_},{x2_},{y2_},{round(area*ppx*ppy, 1)}\n')
 
 
 def color_segmet(image_path, width=None, height=None, points=None, method=2):
@@ -64,22 +64,37 @@ def color_segmet(image_path, width=None, height=None, points=None, method=2):
 
     segment_method = color_segment_1 if method == 1 else color_segment_2
     image = cv2.imread(image_path)
-
     rects, areas = segment_method(image)
+    
+    if points is not None:
+        left = min(points[0][0], points[1][0])
+        top = min(points[0][1], points[1][1])
+        right = max(points[0][0], points[1][0])
+        bottom = max(points[0][1], points[1][1])
+    
+        ppx = width / (right - left + 1)
+        ppy = height / (bottom - top + 1)
 
-    result_image_path = image_path.replace('.png', '_result.jpg')
-    for (x1, y1, x2, y2), area in zip(rects, areas):
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        cv2.putText(image, f'{area}', (x1, y2-25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-        cv2.putText(image, f'({x2-x1},{y2-y1})', (x1, y2), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-    cv2.imwrite(result_image_path, image)
+        result_image_path = image_path.replace('.png', '_result.jpg')
+        idx_sort = np.argsort(np.array(areas))
+        for idx in idx_sort[::-1]:
+            x1, y1, x2, y2 = rects[idx]
+            area = areas[idx]
+            x1_ = round((x1 - left) * ppx, 1)
+            y1_ = round((y1 - top)  * ppy, 1)
+            x2_ = round((x2 - left)  * ppx, 1)
+            y2_ = round((y2 - top)  * ppy, 1)
+            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(image, f'{round(area*ppx*ppy, 1)}', (x1, y2-25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+            cv2.putText(image, f'({round(x2_-x1_, 1)},{round(y2_-y1_, 1)})', (x1, y2), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+        cv2.imwrite(result_image_path, image)
     
     image_height, image_width = image.shape[:2]
     if width is None or height is None:
         width = image_width
         height = image_height
     if points is None:
-        points = [[0, 0], [image_width-1, image_height-1]]
+        points = [[0, 0], [image_width, image_height]]
     save_result_to_txt(result_path, rects, areas, width, height, points)
 
 
