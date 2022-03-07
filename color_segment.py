@@ -17,16 +17,39 @@ def color_segment_1(image, min_size=20):
 
 # 效果好，速度较慢
 def color_segment_2(image, min_size=20, min_area=400):
+    # 1.基于像素值频率的图像滤波
     image = vote_filter2d(image, ksize=5)
+    cv2.imwrite('vote_filter2d.jpg', image)
+    
+    # 2.去除背景干扰
     image_clean = clean_background(np.array(image), min_size=min_size)
-
-    colors, masks = get_sub_masks(image_clean, min_area=min_area)
-    masks = merge_masks(colors, masks)
-    masks = filter_edge_mask(masks)
-
+    cv2.imwrite('clean_background.jpg', image_clean)
+    
+    # 3. 按照颜色值划分子区域
+    sub_colors, sub_masks = get_sub_masks(image_clean, min_area=min_area)
+    sub_mask = np.array(sub_masks[0])
+    for mask in sub_masks[1:]:
+        sub_mask += mask
+    cv2.imwrite(f'get_sub_masks.jpg', sub_mask)
+    
+    # 4. 合并颜色相近的子区域
+    merged_masks = merge_masks(sub_colors, sub_masks)
+    merged_mask = np.array(merged_masks[0])
+    for mask in merged_masks[1:]:
+        merged_mask += mask
+    cv2.imwrite(f'merge_masks.jpg', merged_mask)
+    
+    # 5. 过滤细小区域
+    filter_masks = filter_edge_mask(merged_masks)
+    filter_mask = np.array(filter_masks[0])
+    for mask in filter_masks[1:]:
+        filter_mask += mask
+    cv2.imwrite(f'filter_edge_mask.jpg', filter_mask)
+    
+    # 6 基于区域轮廓生成矩形框
     rects = []
     areas = []
-    for mask in masks:
+    for mask in filter_masks:
         rects_, areas_ = get_rects_from_mask(mask, min_size=20)
         rects += rects_
         areas += areas_
